@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Employee Management System</title>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+<style>
+body{background:#f4f7fc;}
+.sidebar{min-height:100vh;background:#0d6efd;color:white;}
+.sidebar h3{padding:20px;text-align:center;}
+.card-box{border:none;border-radius:15px;box-shadow:0 4px 15px rgba(0,0,0,0.1);}
+.upload-preview{width:150px;height:150px;border:2px dashed #ccc;object-fit:cover;}
+.id-card{width:380px;border-radius:18px;background:linear-gradient(145deg,#ffffff,#eef5ff);border:2px solid #0d6efd;padding:0;display:none;box-shadow:0 10px 25px rgba(13,110,253,0.18);overflow:hidden;}
+.id-card-header{background:linear-gradient(135deg,#0d6efd,#3b82f6);color:white;padding:12px 14px;}
+.id-card-header h6{margin:0;font-weight:700;letter-spacing:1px;text-transform:uppercase;}
+.id-card-header small{opacity:0.95;}
+.id-card-body{display:flex;gap:12px;align-items:center;padding:14px;}
+.id-photo{width:78px;height:78px;border-radius:50%;object-fit:cover;border:3px solid #0d6efd;}
+.id-card-info{flex:1;min-width:0;}
+.id-card-info h5{margin:0 0 4px;font-size:1.02rem;font-weight:700;color:#0f172a;}
+.id-card-info p{margin:0 0 2px;font-size:0.88rem;color:#334155;}
+.id-card-qr{width:72px;height:72px;display:flex;align-items:center;justify-content:center;background:white;border-radius:10px;border:1px solid #dbeafe;padding:4px;}
+.id-card-footer{padding:0 14px 14px;font-size:0.82rem;color:#475569;border-top:1px solid #e5eefb;}
+.table-section{max-height:400px;overflow:auto;}
+
+/* Print report layout styling */
+#printReportContainer, #printProfileContainer { display: none; }
+@media print {
+  body { background: white; color: black; }
+  .container-fluid, .modal, .sidebar { display: none !important; }
+  #printReportContainer.active { display: block !important; }
+  #printProfileContainer.active { display: block !important; }
+}
+</style>
+</head>
+<body>
+<div class="container-fluid">
+  <div class="row">
+    <div class="col-lg-2 sidebar">
+      <h3>EMS</h3>
+      <ul class="nav flex-column p-3">
+        <li class="nav-item"><a class="nav-link text-white">Dashboard</a></li>
+        <li class="nav-item"><a class="nav-link text-white">Employees</a></li>
+        <li class="nav-item"><a class="nav-link text-white">ID Cards</a></li>
+        <li class="nav-item"><a class="nav-link text-white">Reports</a></li>
+      </ul>
+    </div>
+
+    <div class="col-lg-10 p-4">
+      <h2 class="mb-4">Employee Management Dashboard</h2>
+
+      <div class="row mb-4">
+        <div class="col-md-4"><div class="card card-box p-3"><h5>Total Employees</h5><h2 id="totalEmp">0</h2></div></div>
+        
+      </div>
+
+      <div class="card card-box p-4 mb-4">
+        <h4>Add Employee</h4>
+        <div class="row g-3">
+          <h5 class="mt-4 text-primary">Establishment Details</h5>
+          <div class="col-md-4"><select class="form-select" id="establishmentName"><option selected>Select Establishmentname</option><option>MGS</option><option>TEJ</option><option>PCC</option><option>SCPL</option><option>BGR_MIL</option><option>OTHER</option><option>MAHALAKSHMI</option></select></div>
+          <div class="col-md-4"><input type="text" class="form-control" id="ownerName" placeholder="Owner of Establishment"></div>
+          <div class="col-md-4"><input type="text" class="form-control" id="empCode" placeholder="Employee Code" inputmode="text" autocomplete="off" pattern="[A-Za-z0-9]+" oninput="this.value = this.value.replace(/[^A-Za-z0-9]/g, '')"></div>
+
+          <h5 class="mt-4 text-primary">Personal Details</h5>
+          <div class="col-md-4"><input type="text" class="form-control" id="name" placeholder="Employee Name"></div>
+          <div class="col-md-4"><input type="text" class="form-control" id="fatherName" placeholder="Father / Spouse Name"></div>
+          <div class="col-md-4"><select class="form-select" id="bloodGroup"><option selected>Select Blood Group</option><option>A+</option><option>A-</option><option>B+</option><option>B-</option><option>AB+</option><option>AB-</option><option>O+</option><option>O-</option></select></div>
+          <div class="col-md-4"><select class="form-control" id="gender"><option>Select Gender</option><option>Male</option><option>Female</option><option>Other</option></select></div>
+          <div class="col-md-4"><input type="date" class="form-control" id="birthDate" placeholder="BirthDate"></div>
+          <div class="col-md-4"><input type="text" class="form-control" id="nationality" placeholder="Nationality"></div>
+          <div class="col-md-4"><input type="text" class="form-control" id="education" placeholder="Education Level"></div>
+          <div class="col-md-4"><input type="text" class="form-control" id="panNo" placeholder="PAN Number" autocomplete="off"></div>
+          <div class="col-md-4"><input type="text" class="form-control" id="aadhaarNo" placeholder="Aadhaar Number" autocomplete="off" inputmode="numeric" maxlength="12"></div>
+          <div class="col-md-4"><input type="text" class="form-control" id="mobile" placeholder="Mobile Number" autocomplete="off" inputmode="numeric" maxlength="10"></div>
+          <div class="col-md-12"><input type="text" class="form-control" id="identificationMark" placeholder="Mark of Identification"></div>
+          <div class="col-md-4"><input type="email" class="form-control" id="email" placeholder="Email Address"></div>
+
+          <h5 class="mt-4 text-primary">Employment Details</h5>
+          <div class="col-md-4"><input type="text" class="form-control" id="designation" placeholder="Designation"></div>
+          <div class="col-md-4"><input type="text" class="form-control" id="department" placeholder="Department"></div>
+          <div class="col-md-4">
+            <div class="input-group">
+              <span class="input-group-text" style="font-size: 0.85rem;">Joining Date</span>
+              <input type="date" class="form-control" id="joiningDate">
+            </div>
+          </div>
+          <div class="col-md-4"><select class="form-control" id="employmentType"><option>Select Employment Type</option><option>Departmental</option><option>Contractual</option></select></div>
+          <div class="col-md-4">
+            <select class="form-select" id="addressCategory" aria-label="Address category">
+              <option value="">Select Address Category</option>
+              <option>HS</option>
+              <option>S</option>
+              <option>SS</option>
+              <option>US</option>
+            </select>
+          </div>
+          <div class="col-md-4">
+            <select class="form-select" id="idCardStatus">
+              <option value="">Select ID Card Status</option>
+              <option value="Issued">ID Card Issued</option>
+              <option value="Not Issued">ID Card Not Issued</option>
+            </select>
+          </div>
+          <div class="col-md-4"><input type="text" class="form-control" id="uan" placeholder="UAN"></div>
+          <div class="col-md-4"><input type="text" class="form-control" id="esicip" placeholder="ESIC IP No"></div>
+          <div class="col-md-4"><input type="text" class="form-control" id="lwf" placeholder="LWF"></div>
+          <div class="col-md-4"><input type="text" class="form-control" id="vtcNo" placeholder="VTC No"></div>
+          <div class="col-md-4">
+            <div class="input-group">
+              <span class="input-group-text" style="font-size: 0.85rem;">VTC Date</span>
+              <input type="date" class="form-control" id="vtcDate">
+            </div>
+          </div>
+          <div class="col-md-4"><input type="text" class="form-control" id="imePmeNo" placeholder="IME/PME No"></div>
+          <div class="col-md-4">
+            <div class="input-group">
+              <span class="input-group-text" style="font-size: 0.85rem;">IME/PME Date</span>
+              <input type="date" class="form-control" id="imePmeDate">
+            </div>
+          </div>
+          <div class="col-md-4">
+            <div class="input-group">
+              <span class="input-group-text" style="font-size: 0.85rem;">Exit Date</span>
+              <input type="date" class="form-control" id="exitDate">
+            </div>
+          </div>
+          <div class="col-md-4"><input type="text" class="form-control" id="exitReason" placeholder="Reason for Exit"></div>
+
+          <h5 class="mt-4 text-primary">Bank Details</h5>
+          <div class="col-md-4"><input type="text" class="form-control" id="bankName" placeholder="Bank Name"></div>
+          <div class="col-md-4"><input type="text" class="form-control" id="accountNo" placeholder="Bank Account Number"></div>
+          <div class="col-md-4"><input type="text" class="form-control" id="branchIfsc" placeholder="Branch (IFSC)"></div>
+
+          <h5 class="mt-4 text-primary">Permanent Address</h5>
+          <div class="col-md-3"><input type="text" class="form-control" id="permPO" placeholder="PO"></div>
+          <div class="col-md-3"><input type="text" class="form-control" id="permDistrict" placeholder="District"></div>
+          <div class="col-md-3"><input type="text" class="form-control" id="permState" placeholder="State"></div>
+          <div class="col-md-3"><input type="text" class="form-control" id="permPin" placeholder="PIN Code"></div>
+
+          <h5 class="mt-4 text-primary">Present Address</h5>
+          <div class="col-md-12 mb-2">
+            <select class="form-select form-select-sm w-auto" id="sameAsPermanent" aria-label="Same as permanent address">
+              <option value="no">No</option>
+              <option value="yes">Same as Permanent Address</option>
+            </select>
+          </div>
+
+          <div class="col-md-3"><input type="text" class="form-control" id="presentPO" placeholder="PO"></div>
+          <div class="col-md-3"><input type="text" class="form-control" id="presentDistrict" placeholder="District"></div>
+          <div class="col-md-3"><input type="text" class="form-control" id="presentState" placeholder="State"></div>
+          <div class="col-md-3"><input type="text" class="form-control" id="presentPin" placeholder="PIN Code"></div>
+
+          <h5 class="mt-4 text-primary">Nominee Details</h5>
+          <div class="col-md-4"><input type="text" class="form-control" id="nomineeName" placeholder="Nominee Name"></div>
+          <div class="col-md-8"><textarea class="form-control" rows="2" id="nomineeAddress" placeholder="Nominee Address"></textarea></div>
+
+          <h5 class="mt-4 text-primary">Emergency Contact Details</h5>
+          <div class="col-md-3"><input type="text" class="form-control" id="emergencyContactName" placeholder="Contact Name"></div>
+          <div class="col-md-3"><input type="text" class="form-control" id="emergencyRelation" placeholder="Relation"></div>
+          <div class="col-md-3"><input type="text" class="form-control" id="emergencyContactNo" placeholder="Contact Number" autocomplete="off" inputmode="numeric" maxlength="10"></div>
+          <div class="col-md-3"><input type="text" class="form-control" id="emergencyAddress" placeholder="Address"></div>
+
+          <h5 class="mt-4 text-primary">Photo Upload</h5>
+          <div class="col-md-6">
+            <input type="file" id="photoInput" class="form-control mb-2">
+            <img id="preview" src="https://via.placeholder.com/150" class="upload-preview">
+          </div>
+
+          <h5 class="mt-4 text-primary">Document Uploads</h5>
+          <div class="row g-3">
+            <div class="col-md-4"><label class="form-label">Driving License (DL)</label><input type="file" class="form-control" id="dlUpload" onchange="previewFile(this)"><button type="button" class="btn btn-sm btn-primary mt-2" onclick="showPreview('dlUpload')">Preview</button></div>
+            <div class="col-md-4"><label class="form-label">PAN Card</label><input type="file" class="form-control" id="panUpload" onchange="previewFile(this)"><button type="button" class="btn btn-sm btn-primary mt-2" onclick="showPreview('panUpload')">Preview</button></div>
+            <div class="col-md-4"><label class="form-label">Aadhaar Card</label><input type="file" class="form-control" id="aadhaarUpload" onchange="previewFile(this)"><button type="button" class="btn btn-sm btn-primary mt-2" onclick="showPreview('aadhaarUpload')">Preview</button></div>
+            <div class="col-md-4"><label class="form-label">Signature</label><input type="file" class="form-control" id="signUpload" onchange="previewFile(this)"><button type="button" class="btn btn-sm btn-primary mt-2" onclick="showPreview('signUpload')">Preview</button></div>
+            <div class="col-md-4"><label class="form-label">VTC Document</label><input type="file" class="form-control" id="vtcUpload" onchange="previewFile(this)"><button type="button" class="btn btn-sm btn-primary mt-2" onclick="showPreview('vtcUpload')">Preview</button></div>
+            <div class="col-md-4"><label class="form-label">IME Document</label><input type="file" class="form-control" id="imeUpload" onchange="previewFile(this)"><button type="button" class="btn btn-sm btn-primary mt-2" onclick="showPreview('imeUpload')">Preview</button></div>
+          </div>
+
+          <div class="modal fade" id="previewModal" tabindex="-1">
+            <div class="modal-dialog modal-lg">
+              <div class="modal-content">
+                <div class="modal-header"><h5 class="modal-title">Document Preview</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+                <div class="modal-body text-center"><img id="imagePreview" class="img-fluid d-none"><iframe id="pdfPreview" class="w-100 d-none" height="500"></iframe></div>
+              </div>
+            </div>
+          </div>
+
+          <button class="btn btn-success" onclick="addEmployee()">Add Employee</button>
+          <button class="btn btn-primary" onclick="createIDCard()">Create ID Card</button>
+          <button class="btn btn-danger" onclick="deleteEmployee()">Delete</button>
+          <button class="btn btn-warning" onclick="updateEmployee()">Update</button>
+          <button class="btn btn-secondary" onclick="resetForm()">Reset</button>
+          <button class="btn btn-dark" onclick="generatePDF()">Generate PDF</button>
+        </div>
+      </div>
+
+      <div class="card card-box p-3 mb-4">
+        <div class="row">
+          <div class="col-md-8"><input type="text" id="search" class="form-control" placeholder="Search Employee (by Code, Name, Designation, Mobile...)"></div>
+          <div class="col-md-4"><button class="btn btn-primary w-100" id="searchBtn">Search</button></div>
+        </div>
+      </div>
+
+      <div class="card card-box p-3 table-section">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+          <h4 class="mb-0">Employee Records</h4>
+          <button class="btn btn-outline-primary btn-sm" onclick="printAllEmployees()">Export All to PDF</button>
+        </div>
+        <table class="table table-striped">
+          <thead><tr><th>Code</th><th>Name</th><th>Designation</th><th>Mobile</th></tr></thead>
+          <tbody id="employeeTable"></tbody>
+        </table>
+      </div>
+
+      <div class="mt-5">
+        <div class="id-card" id="idCard">
+          <div class="id-card-header">
+            <h6>Employee ID Card</h6>
+            <small id="cardCompany">Company Name</small>
+          </div>
+          <div class="id-card-body">
+            <img id="cardPhoto" class="id-photo" alt="Employee photo">
+            <div class="id-card-info">
+              <h5 id="cardName">Employee Name</h5>
+              <p><strong>Father:</strong> <span id="cardFather">Father / Spouse Name</span></p>
+              <p><strong>Code:</strong> <span id="cardCode">Employee Code</span></p>
+              <p><strong>Designation:</strong> <span id="cardDesignation">Designation</span></p>
+              <p><strong>Gender:</strong> <span id="cardGender">Gender</span></p>
+              <p><strong>Blood Group:</strong> <span id="cardBloodGroup">Blood Group</span></p>
+              <p><strong>Mobile:</strong> <span id="cardMobile">Mobile Number</span></p>
+              <p><strong>PAN:</strong> <span id="cardPan">PAN Number</span></p>
+              <p><strong>Aadhaar:</strong> <span id="cardAadhaar">Aadhaar Number</span></p>
+              <p><strong>Present Address:</strong> <span id="cardAddress">Present Address</span></p>
+            </div>
+            <div class="id-card-qr" id="qrcode"></div>
+          </div>
+          <div class="id-card-footer">
+            <span id="cardOwner">Owner Name</span> | <span id="cardEmail">Email Address</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script src="proj1.js" defer></script>
+</body>
+</html>

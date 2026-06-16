@@ -1,0 +1,194 @@
+/* General */
+body{
+    background:#f4f7fc;
+    font-family:'Segoe UI',sans-serif;
+}
+
+h2,h4{
+    font-weight:600;
+}
+
+/* Sidebar */
+.sidebar{
+    background:#0d6efd;
+    min-height:100vh;
+    color:white;
+    box-shadow:3px 0 10px rgba(0,0,0,0.1);
+}
+
+.sidebar h3{
+    padding:20px;
+    text-align:center;
+    border-bottom:1px solid rgba(255,255,255,0.2);
+}
+
+.sidebar .nav-link{
+    color:white;
+    padding:12px 15px;
+    border-radius:8px;
+    transition:0.3s;
+}
+
+.sidebar .nav-link:hover{
+    background:rgba(255,255,255,0.2);
+}
+
+/* Cards */
+.card-box{
+    border:none;
+    border-radius:15px;
+    box-shadow:0 4px 12px rgba(0,0,0,0.08);
+    transition:0.3s;
+}
+
+.card-box:hover{
+    transform:translateY(-3px);
+}
+
+/* Dashboard */
+.dashboard-card{
+    text-align:center;
+    padding:20px;
+}
+
+.dashboard-card h2{
+    color:#0d6efd;
+    margin-top:10px;
+}
+
+/* Form */
+.form-control{
+    border-radius:10px;
+}
+
+.form-control:focus{
+    box-shadow:none;
+    border-color:#0d6efd;
+}
+
+/* Upload Preview */
+.upload-preview{
+    width:150px;
+    height:150px;
+    border:2px dashed #d1d1d1;
+    border-radius:10px;
+    object-fit:cover;
+    margin-top:10px;
+}
+
+/* Buttons */
+.btn{
+    border-radius:10px;
+    font-weight:500;
+}
+
+.btn-success,
+.btn-primary,
+.btn-danger,
+.btn-warning,
+.btn-dark{
+    padding:10px 20px;
+}
+
+/* Table */
+.table-section{
+    max-height:450px;
+    overflow-y:auto;
+}
+
+.table thead{
+    position:sticky;
+    top:0;
+    z-index:1;
+}
+
+.table thead th{
+    background:#0d6efd;
+    color:white;
+}
+
+/* ID Card */
+.id-card{
+    width:320px;
+    background:white;
+    border:3px solid #0d6efd;
+    border-radius:15px;
+    padding:20px;
+    display:none;
+    margin:auto;
+    box-shadow:0 5px 15px rgba(0,0,0,0.15);
+}
+
+.id-card h4{
+    color:#0d6efd;
+    margin-bottom:15px;
+}
+
+.id-photo{
+    width:110px;
+    height:110px;
+    border-radius:50%;
+    object-fit:cover;
+    border:3px solid #0d6efd;
+    margin-bottom:15px;
+}
+
+.id-card p{
+    margin:5px 0;
+    font-size:14px;
+}
+
+/* Search */
+#search{
+    border-radius:10px;
+}
+
+/* Responsive */
+@media(max-width:992px){
+
+    .sidebar{
+        min-height:auto;
+    }
+
+    .id-card{
+        width:100%;
+    }
+
+}
+
+@media(max-width:768px){
+
+    .upload-preview{
+        width:120px;
+        height:120px;
+    }
+
+    .id-photo{
+        width:90px;
+        height:90px;
+    }
+
+}
+
+#qrcode{
+    display:flex;
+    justify-content:center;
+    margin-top:15px;
+}
+
+.form-label{
+    font-weight: 600;
+    color: #333;
+}
+
+.form-control[type="file"]{
+    padding: 8px;
+    border-radius: 8px;
+    border: 1px solid #ced4da;
+    background: #fff;
+}
+
+.form-control[type="file"]:focus{
+    border-color: #0d6efd;
+    box-shadow: 0 0 5px rgba(13,110,253,0.25);
+}

@@ -1,0 +1,44 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"label": "Start Employee Backend",
+			"type": "shell",
+			"command": "cd backend && npm install && node server.js",
+			"isBackground": true,
+			"problemMatcher": [],
+			"group": "build",
+			"options": {
+				"shell": {
+					"executable": "C:\\Windows\\System32\\cmd.exe",
+					"args": [
+						"/d",
+						"/s",
+						"/c"
+					]
+				}
+			}
+		},
+		{
+			"label": "Check mssql versions",
+			"type": "shell",
+			"command": "cd backend && npm view mssql versions --json",
+			"isBackground": false,
+			"problemMatcher": []
+		},
+		{
+			"label": "List mssql versions",
+			"type": "shell",
+			"command": "cd backend; npm view mssql versions --json",
+			"isBackground": false,
+			"problemMatcher": []
+		},
+		{
+			"label": "Start Backend with mssql",
+			"type": "shell",
+			"command": "cd backend && npm install mssql@9.0.0 && node server.js",
+			"isBackground": true,
+			"problemMatcher": []
+		}
+	]
+}
