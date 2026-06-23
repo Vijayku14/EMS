@@ -5,6 +5,12 @@
 [functions]
   node_bundler = "esbuild"
 
+# Redirect root path to proj1.html
+[[redirects]]
+  from = "/"
+  to = "/proj1.html"
+  status = 200
+
 # Redirect /api/* calls to the Netlify function
 [[redirects]]
   from = "/api/employees"
