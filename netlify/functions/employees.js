@@ -19,7 +19,6 @@ function response(statusCode, body) {
 // ─── Blob store helpers ───────────────────────────────────────────────────────
 function getEmployeeStore(context) {
   const options = {
-    name: "employees",
     consistency: "strong",
   };
   if (context.site?.id) {
@@ -28,7 +27,7 @@ function getEmployeeStore(context) {
   if (process.env.NETLIFY_TOKEN) {
     options.token = process.env.NETLIFY_TOKEN;
   }
-  return getStore(options);
+  return getStore("employees", options);
 }
 
 function sanitizeName(name) {
