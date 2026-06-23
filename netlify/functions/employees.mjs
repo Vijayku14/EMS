@@ -1,4 +1,4 @@
-const { getStore } = require("@netlify/blobs");
+import { getStore } from "@netlify/blobs";
 
 // ─── CORS helper ─────────────────────────────────────────────────────────────
 const CORS_HEADERS = {
@@ -9,25 +9,15 @@ const CORS_HEADERS = {
 };
 
 function response(statusCode, body) {
-  return {
-    statusCode,
+  return new Response(typeof body === "string" ? body : JSON.stringify(body), {
+    status: statusCode,
     headers: CORS_HEADERS,
-    body: typeof body === "string" ? body : JSON.stringify(body),
-  };
+  });
 }
 
 // ─── Blob store helpers ───────────────────────────────────────────────────────
-function getEmployeeStore(context) {
-  const options = {
-    consistency: "strong",
-  };
-  if (context.site?.id) {
-    options.siteID = context.site.id;
-  }
-  if (process.env.NETLIFY_TOKEN) {
-    options.token = process.env.NETLIFY_TOKEN;
-  }
-  return getStore("employees", options);
+function getEmployeeStore() {
+  return getStore("employees");
 }
 
 function sanitizeName(name) {
@@ -111,22 +101,25 @@ async function removeEmployee(store, id) {
 }
 
 // ─── Main handler ─────────────────────────────────────────────────────────────
-exports.handler = async function (event, context) {
+export default async (req, context) => {
   // Handle CORS preflight
-  if (event.httpMethod === "OPTIONS") {
-    return { statusCode: 204, headers: CORS_HEADERS, body: "" };
+  if (req.method === "OPTIONS") {
+    return new Response(null, {
+      status: 204,
+      headers: CORS_HEADERS,
+    });
   }
 
   let store;
   try {
-    store = getEmployeeStore(context);
+    store = getEmployeeStore();
   } catch (err) {
     // Fallback for local dev without Netlify Blobs context
-    console.warn("Blobs not available, using in-memory fallback:", err.message);
+    console.warn("Blobs not available:", err.message);
     store = null;
   }
 
-  // ── In-memory fallback (local dev only) ─────────────────────────────────
+  // ── Fallback ─────────────────────────────────────────────────────────────
   if (!store) {
     return response(503, {
       message:
@@ -134,9 +127,10 @@ exports.handler = async function (event, context) {
     });
   }
 
-  const method = event.httpMethod;
-  const params = event.queryStringParameters || {};
-  const id = params.id ? Number(params.id) : null;
+  const method = req.method;
+  const url = new URL(req.url);
+  const idParam = url.searchParams.get("id");
+  const id = idParam ? Number(idParam) : null;
 
   try {
     // ── GET /api/employees ─────────────────────────────────────────────────
@@ -147,7 +141,8 @@ exports.handler = async function (event, context) {
 
     // ── POST /api/employees ────────────────────────────────────────────────
     if (method === "POST") {
-      const body = JSON.parse(event.body || "{}");
+      const text = await req.text();
+      const body = JSON.parse(text || "{}");
       const newEmployee = {
         id: Date.now(),
         ...body,
@@ -160,7 +155,8 @@ exports.handler = async function (event, context) {
     // ── PUT /api/employees?id=xxx ──────────────────────────────────────────
     if (method === "PUT") {
       if (!id) return response(400, { message: "Missing employee id" });
-      const body = JSON.parse(event.body || "{}");
+      const text = await req.text();
+      const body = JSON.parse(text || "{}");
       const updatedEmployee = {
         id,
         ...body,
