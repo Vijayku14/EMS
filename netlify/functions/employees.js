@@ -18,12 +18,17 @@ function response(statusCode, body) {
 
 // ─── Blob store helpers ───────────────────────────────────────────────────────
 function getEmployeeStore(context) {
-  return getStore({
+  const options = {
     name: "employees",
-    siteID: context.site?.id,
-    token: process.env.NETLIFY_TOKEN,
     consistency: "strong",
-  });
+  };
+  if (context.site?.id) {
+    options.siteID = context.site.id;
+  }
+  if (process.env.NETLIFY_TOKEN) {
+    options.token = process.env.NETLIFY_TOKEN;
+  }
+  return getStore(options);
 }
 
 function sanitizeName(name) {
