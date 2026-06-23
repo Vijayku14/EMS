@@ -1,5 +1,5 @@
 let count = 0;
-const API_BASE = "http://localhost:3000/api";
+const API_BASE = "/api";
 
 // Load employees on page load
 document.addEventListener("DOMContentLoaded", function () {
@@ -126,7 +126,7 @@ async function addEmployee() {
         loadEmployees();
     } catch (error) {
         console.error("Error details:", error);
-        alert(`Error: ${error.message}\n\nMake sure:\n1. Backend is running at http://localhost:3000\n2. SQL Server is running\n3. You're accessing via http://localhost:3000/proj1.html (not file://)`);
+        alert(`Error saving employee: ${error.message}`);
     }
 }
 
@@ -152,7 +152,7 @@ async function updateEmployee() {
             return;
         }
 
-        const response = await fetch(`${API_BASE}/employees/${existing.id}`, {
+        const response = await fetch(`${API_BASE}/employees?id=${existing.id}`, {
             method: "PUT",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(employee)
@@ -183,7 +183,7 @@ async function deleteEmployee() {
             return;
         }
 
-        const response = await fetch(`${API_BASE}/employees/${existing.id}`, {
+        const response = await fetch(`${API_BASE}/employees?id=${existing.id}`, {
             method: "DELETE"
         });
 

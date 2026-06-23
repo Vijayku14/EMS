@@ -1,14 +1,13 @@
 {
   "name": "employee-management-system",
   "version": "1.0.0",
-  "description": "Employee Management System with Netlify Functions and Blobs",
+  "description": "Employee Management System - Express backend with JSON file storage",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
-    "dev": "netlify dev"
+    "dev": "node server.js"
   },
   "dependencies": {
-    "@netlify/blobs": "^8.1.0",
     "cors": "^2.8.5",
     "express": "^4.18.2"
   },
