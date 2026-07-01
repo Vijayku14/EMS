@@ -130,6 +130,30 @@ async function saveEmployeeToDisk(employee) {
   await fs.writeFile(jsonPath, JSON.stringify(companyEmps, null, 2), 'utf8');
 }
 
+async function saveIndividualEmployeeToDisk(employee) {
+  const companyName = employee.establishmentName || 'Unknown_Company';
+  const { companyDir } = await ensureCompanyDirectories(companyName);
+  const safeEmpCode = sanitizeName(employee.empCode || 'unknown');
+  const individualPath = path.join(companyDir, `${safeEmpCode}.json`);
+  
+  await fs.writeFile(individualPath, JSON.stringify(employee, null, 2), 'utf8');
+  console.log(`✅ Saved individual file for ${employee.name}: ${individualPath}`);
+}
+
+async function removeIndividualEmployeeFromDisk(employee) {
+  if (!employee) return;
+  const companyName = employee.establishmentName || 'Unknown_Company';
+  const safeCompany = sanitizeName(companyName);
+  const safeEmpCode = sanitizeName(employee.empCode || 'unknown');
+  const individualPath = path.join(DATA_DIR, safeCompany, `${safeEmpCode}.json`);
+  try {
+    await fs.unlink(individualPath);
+    console.log(`✅ Removed individual file for ${employee.name}: ${individualPath}`);
+  } catch (err) {
+    // Ignore if file doesn't exist
+  }
+}
+
 async function removeEmployeeFromDisk(id) {
   try {
     await fs.mkdir(DATA_DIR, { recursive: true });
@@ -175,6 +199,7 @@ app.post('/api/employees', async (req, res) => {
     const companyName = newEmployee.establishmentName || 'Unknown_Company';
     newEmployee = await processEmployeeImages(newEmployee, companyName);
     await saveEmployeeToDisk(newEmployee);
+    await saveIndividualEmployeeToDisk(newEmployee);
     res.status(201).json(newEmployee);
   } catch (error) {
     console.error('POST /api/employees error:', error);
@@ -190,6 +215,7 @@ app.put('/api/employees/:id', async (req, res) => {
     updatedEmployee = await processEmployeeImages(updatedEmployee, companyName);
     await removeEmployeeFromDisk(id);
     await saveEmployeeToDisk(updatedEmployee);
+    await saveIndividualEmployeeToDisk(updatedEmployee);
     res.json(updatedEmployee);
   } catch (error) {
     console.error('PUT /api/employees/:id error:', error);
@@ -200,7 +226,13 @@ app.put('/api/employees/:id', async (req, res) => {
 app.delete('/api/employees/:id', async (req, res) => {
   try {
     const id = Number(req.params.id);
+    const employees = await readAllEmployeesFromDisk();
+    const employee = employees.find(emp => emp.id === id);
+    
     await removeEmployeeFromDisk(id);
+    if (employee) {
+      await removeIndividualEmployeeFromDisk(employee);
+    }
     res.status(204).send();
   } catch (error) {
     console.error('DELETE /api/employees/:id error:', error);

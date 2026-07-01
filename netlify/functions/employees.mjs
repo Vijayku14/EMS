@@ -1,4 +1,6 @@
 import { getStore } from "@netlify/blobs";
+import fs from "fs/promises";
+import path from "path";
 
 // ─── CORS helper ─────────────────────────────────────────────────────────────
 const CORS_HEADERS = {
@@ -22,6 +24,40 @@ function getEmployeeStore() {
 
 function sanitizeName(name) {
   return (name || "unknown").trim().replace(/[^a-zA-Z0-9_-]/g, "_");
+}
+
+async function saveLocalBackup(employee) {
+  try {
+    const projectRoot = process.cwd();
+    const dataDir = path.join(projectRoot, "EMS_Data");
+    const companyName = employee.establishmentName || "Unknown_Company";
+    const safeCompany = sanitizeName(companyName);
+    const safeEmpCode = sanitizeName(employee.empCode || "unknown");
+    const companyDir = path.join(dataDir, safeCompany);
+    
+    await fs.mkdir(companyDir, { recursive: true });
+    const filePath = path.join(companyDir, `${safeEmpCode}.json`);
+    await fs.writeFile(filePath, JSON.stringify(employee, null, 2), "utf8");
+    console.log(`[Local Backup] Saved individual file: ${filePath}`);
+  } catch (err) {
+    console.warn("[Local Backup] Failed to write local backup:", err.message);
+  }
+}
+
+async function removeLocalBackup(employee) {
+  try {
+    const projectRoot = process.cwd();
+    const dataDir = path.join(projectRoot, "EMS_Data");
+    const companyName = employee.establishmentName || "Unknown_Company";
+    const safeCompany = sanitizeName(companyName);
+    const safeEmpCode = sanitizeName(employee.empCode || "unknown");
+    const filePath = path.join(dataDir, safeCompany, `${safeEmpCode}.json`);
+    
+    await fs.unlink(filePath);
+    console.log(`[Local Backup] Deleted individual file: ${filePath}`);
+  } catch (err) {
+    // Ignore if file doesn't exist
+  }
 }
 
 async function readAllEmployees(store) {
@@ -149,6 +185,7 @@ export default async (req, context) => {
         createdAt: new Date().toISOString(),
       };
       await saveEmployee(store, newEmployee);
+      await saveLocalBackup(newEmployee);
       return response(201, newEmployee);
     }
 
@@ -165,13 +202,20 @@ export default async (req, context) => {
       // Remove from old company slot first (handles company name change)
       await removeEmployee(store, id);
       await saveEmployee(store, updatedEmployee);
+      await saveLocalBackup(updatedEmployee);
       return response(200, updatedEmployee);
     }
 
     // ── DELETE /api/employees?id=xxx ───────────────────────────────────────
     if (method === "DELETE") {
       if (!id) return response(400, { message: "Missing employee id" });
+      const employees = await readAllEmployees(store);
+      const employee = employees.find(emp => emp.id === id);
+      
       await removeEmployee(store, id);
+      if (employee) {
+        await removeLocalBackup(employee);
+      }
       return response(200, { success: true });
     }
 
